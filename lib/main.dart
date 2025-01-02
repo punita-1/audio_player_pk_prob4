@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:just_audio/just_audio.dart';
 
 void main() {
   runApp(SoundPlayerApp());
@@ -24,25 +24,29 @@ class SoundPlayerScreen extends StatelessWidget {
 
   final AudioPlayer audioPlayer = AudioPlayer();
 
-  void playSound(String filePath) async {
-    await audioPlayer.play(AssetSource(filePath));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Sound Player'),
-      ),
+      appBar: AppBar(title: Text('Sound Player')),
       body: ListView.builder(
         itemCount: sounds.length,
         itemBuilder: (context, index) {
           final sound = sounds[index];
           return ListTile(
-            leading: Icon(Icons.music_note),
             title: Text(sound['title']!),
-            trailing: Icon(Icons.play_arrow),
-            onTap: () => playSound(sound['file']!),
+            trailing: IconButton(
+              icon: Icon(Icons.play_arrow),
+              onPressed: () async {
+                try {
+                  await audioPlayer.setAsset(sound['file']!);
+                  await audioPlayer.play();
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error playing sound: $e')),
+                  );
+                }
+              },
+            ),
           );
         },
       ),
